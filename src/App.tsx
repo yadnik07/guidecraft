@@ -6,9 +6,12 @@ const isLoggedIn = () => localStorage.getItem("auth") === "true"
 const getUser = () => localStorage.getItem("user")
 
 /* ---------- PROTECTED ROUTE ---------- */
-function Protected({ children }: { children: JSX.Element }) {
-  return isLoggedIn() ? children : <Navigate to="/login" />
+import React from "react"
+
+function Protected({ children }: { children: React.ReactNode }) {
+  return isLoggedIn() ? <>{children}</> : <Navigate to="/login" />
 }
+
 
 /* ---------- LOGIN / SIGNUP PAGE ---------- */
 function Login() {
