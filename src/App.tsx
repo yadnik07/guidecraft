@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Routes,
   Route,
@@ -7,31 +7,21 @@ import {
 } from "react-router-dom"
 
 /* ---------------- AUTH STATE (MOCK) ---------------- */
-function useAuth() {
-  const isLoggedIn = localStorage.getItem("auth") === "true"
-  return { isLoggedIn }
-}
-
-/* ---------------- PROTECTED ROUTE ---------------- */
-function Protected({ children }: { children: JSX.Element }) {
-  const { isLoggedIn } = useAuth()
-  return isLoggedIn ? children : <Navigate to="/login" replace />
+function isLoggedIn() {
+  return localStorage.getItem("auth") === "true"
 }
 
 /* ---------------- LOGIN PAGE ---------------- */
 function Login() {
   const navigate = useNavigate()
-  const { isLoggedIn } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-
-  if (isLoggedIn) {
-    return <Navigate to="/" replace />
-  }
 
   const handleLogin = () => {
     if (!email || !password) return
     localStorage.setItem("auth", "true")
+
+    // after login, go back to home (generate again)
     navigate("/", { replace: true })
   }
 
@@ -39,7 +29,7 @@ function Login() {
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">
       <div className="w-full max-w-sm bg-white/5 p-8 rounded-2xl border border-white/10">
         <h1 className="text-3xl font-bold mb-6 text-center">
-          Sign In
+          Please Login First
         </h1>
 
         <input
@@ -69,21 +59,28 @@ function Login() {
   )
 }
 
-/* ---------------- HOME ---------------- */
+/* ---------------- HOME (PUBLIC) ---------------- */
 function Home() {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
-  const logout = () => {
-    localStorage.removeItem("auth")
-    navigate("/login", { replace: true })
-  }
-
   const generate = () => {
+    // 🔑 check login first
+    if (!isLoggedIn()) {
+      navigate("/login")
+      return
+    }
+
+    // fake processing
     setLoading(true)
     setTimeout(() => {
       navigate("/preview")
     }, 2000)
+  }
+
+  const logout = () => {
+    localStorage.removeItem("auth")
+    navigate("/")
   }
 
   return (
@@ -92,12 +89,15 @@ function Home() {
         <h1 className="text-2xl font-bold">
           Guide<span className="text-indigo-400">Craft</span>
         </h1>
-        <button
-          onClick={logout}
-          className="px-4 py-2 bg-red-500/80 rounded-lg"
-        >
-          Logout
-        </button>
+
+        {isLoggedIn() && (
+          <button
+            onClick={logout}
+            className="px-4 py-2 bg-red-500/80 rounded-lg"
+          >
+            Logout
+          </button>
+        )}
       </header>
 
       <main className="flex flex-col items-center mt-32 text-center">
@@ -132,10 +132,15 @@ function Home() {
   )
 }
 
-
-/* ---------------- PREVIEW ---------------- */
+/* ---------------- PREVIEW (PROTECTED) ---------------- */
 function Preview() {
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!isLoggedIn()) {
+      navigate("/login", { replace: true })
+    }
+  }, [navigate])
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white px-10 py-8">
@@ -171,23 +176,9 @@ function Preview() {
 export default function App() {
   return (
     <Routes>
+      <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
-      <Route
-        path="/"
-        element={
-          <Protected>
-            <Home />
-          </Protected>
-        }
-      />
-      <Route
-        path="/preview"
-        element={
-          <Protected>
-            <Preview />
-          </Protected>
-        }
-      />
+      <Route path="/preview" element={<Preview />} />
     </Routes>
   )
 }
