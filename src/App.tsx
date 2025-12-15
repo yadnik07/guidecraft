@@ -1,52 +1,24 @@
-import React, { useEffect, useState } from "react"
+import { useState } from "react"
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom"
 
-/* ---------- AUTH HOOK ---------- */
-function useAuth() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [user, setUser] = useState<string | null>(null)
-
-  useEffect(() => {
-    const auth = localStorage.getItem("auth")
-    const name = localStorage.getItem("user")
-    if (auth === "true" && name) {
-      setIsLoggedIn(true)
-      setUser(name)
-    }
-  }, [])
-
-  const login = (name: string) => {
-    localStorage.setItem("auth", "true")
-    localStorage.setItem("user", name)
-    setIsLoggedIn(true)
-    setUser(name)
-  }
-
-  const logout = () => {
-    localStorage.removeItem("auth")
-    localStorage.removeItem("user")
-    setIsLoggedIn(false)
-    setUser(null)
-  }
-
-  return { isLoggedIn, user, login, logout }
-}
+/* ---------- SIMPLE AUTH ---------- */
+const isLoggedIn = () => localStorage.getItem("auth") === "true"
+const getUser = () => localStorage.getItem("user")
 
 /* ---------- PROTECTED ROUTE ---------- */
-function Protected({ children }: { children: React.ReactNode }) {
-  const auth = localStorage.getItem("auth")
-  return auth === "true" ? <>{children}</> : <Navigate to="/login" />
+function Protected({ children }: { children: JSX.Element }) {
+  return isLoggedIn() ? children : <Navigate to="/login" />
 }
 
-/* ---------- LOGIN / SIGNUP ---------- */
+/* ---------- LOGIN / SIGNUP PAGE ---------- */
 function Login() {
-  const navigate = useNavigate()
-  const { login } = useAuth()
   const [name, setName] = useState("")
+  const navigate = useNavigate()
 
   const handleLogin = () => {
     if (!name.trim()) return
-    login(name)
+    localStorage.setItem("auth", "true")
+    localStorage.setItem("user", name)
     navigate("/")
   }
 
@@ -56,15 +28,15 @@ function Login() {
         <h1 className="text-2xl font-bold mb-4">Login / Signup</h1>
 
         <input
+          className="w-full p-3 mb-4 bg-black/40 rounded"
           placeholder="Enter your name"
-          className="w-full p-3 mb-4 bg-black/40 rounded outline-none"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
         <button
           onClick={handleLogin}
-          className="w-full bg-indigo-600 py-2 rounded font-semibold"
+          className="w-full bg-indigo-600 py-2 rounded"
         >
           Continue
         </button>
@@ -78,7 +50,7 @@ function Home() {
   const navigate = useNavigate()
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
-  const user = localStorage.getItem("user")
+  const user = getUser()
 
   const logout = () => {
     localStorage.clear()
@@ -93,32 +65,38 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      {/* HEADER */}
       <header className="flex justify-between items-center px-8 py-6">
-        <div>
-          <h1 className="text-xl font-bold">GuideCraft</h1>
-          <p className="text-sm text-gray-400">Logged in as {user}</p>
-        </div>
+        <h1 className="text-xl font-bold">GuideCraft</h1>
 
-        <button
-          onClick={logout}
-          className="bg-red-500 px-4 py-2 rounded"
-        >
-          Logout
-        </button>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-400">{user}</span>
+          <button
+            onClick={logout}
+            className="bg-red-500 px-4 py-2 rounded"
+          >
+            Logout
+          </button>
+        </div>
       </header>
 
+      {/* HERO */}
       <main className="flex flex-col items-center mt-32 text-center">
-        <h2 className="text-4xl font-bold mb-10">
+        <h2 className="text-4xl font-bold mb-4">
           Turn recordings into <br />
           <span className="text-indigo-400">step-by-step guides</span>
         </h2>
 
-        <div className="bg-white/10 p-8 rounded-xl w-96">
+        <p className="text-gray-400 mb-10">
+          Create beautiful product guides automatically from your screen recordings.
+        </p>
+
+        <div className="bg-white/10 p-8 rounded-xl w-80">
           {!loading ? (
             <>
               <input
                 type="file"
-                className="mb-6"
+                className="mb-4"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
               />
 
