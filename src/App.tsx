@@ -1,196 +1,137 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Routes,
   Route,
   useNavigate,
+  Navigate,
 } from "react-router-dom"
 
-/* ---------------- AUTH HELPERS ---------------- */
-function isLoggedIn() {
-  return localStorage.getItem("auth") === "true"
+/* ---------- AUTH HOOK ---------- */
+function useAuth() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [user, setUser] = useState<string | null>(null)
+
+  useEffect(() => {
+    const auth = localStorage.getItem("auth")
+    const name = localStorage.getItem("user")
+    if (auth === "true") {
+      setIsLoggedIn(true)
+      setUser(name)
+    }
+  }, [])
+
+  const login = (name: string) => {
+    localStorage.setItem("auth", "true")
+    localStorage.setItem("user", name)
+    setIsLoggedIn(true)
+    setUser(name)
+  }
+
+  const logout = () => {
+    localStorage.clear()
+    setIsLoggedIn(false)
+    setUser(null)
+  }
+
+  return { isLoggedIn, user, login, logout }
 }
 
-function getUser() {
-  return localStorage.getItem("currentUser")
+/* ---------- PROTECTED ---------- */
+function Protected({ children }: { children: JSX.Element }) {
+  const auth = localStorage.getItem("auth")
+  return auth === "true" ? children : <Navigate to="/login" />
 }
 
-/* ---------------- LOGIN ---------------- */
+/* ---------- LOGIN ---------- */
 function Login() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const { login } = useAuth()
+  const [name, setName] = useState("")
 
   const handleLogin = () => {
-    if (!email || !password) return
-    localStorage.setItem("auth", "true")
-    localStorage.setItem("currentUser", email)
+    if (!name) return
+    login(name)
     navigate("/")
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">
-      <div className="w-full max-w-sm bg-white/5 p-8 rounded-2xl border border-white/10">
-        <h1 className="text-3xl font-bold mb-6 text-center">Login</h1>
+    <div className="min-h-screen bg-black flex items-center justify-center text-white">
+      <div className="bg-white/10 p-8 rounded-xl w-80">
+        <h1 className="text-2xl font-bold mb-4">Login</h1>
 
         <input
-          type="email"
-          placeholder="Email"
-          className="w-full mb-4 p-3 rounded bg-black/40 border border-white/10"
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full mb-6 p-3 rounded bg-black/40 border border-white/10"
-          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Your name"
+          className="w-full p-3 mb-4 bg-black/40 rounded"
+          onChange={(e) => setName(e.target.value)}
         />
 
         <button
           onClick={handleLogin}
-          className="w-full py-3 bg-indigo-600 rounded-xl font-semibold"
+          className="w-full bg-indigo-600 py-2 rounded"
         >
           Login
         </button>
-
-        <p
-          onClick={() => navigate("/signup")}
-          className="mt-4 text-sm text-center text-indigo-400 cursor-pointer"
-        >
-          New user? Create account
-        </p>
       </div>
     </div>
   )
 }
 
-/* ---------------- SIGNUP ---------------- */
-function Signup() {
-  const navigate = useNavigate()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-
-  const handleSignup = () => {
-    if (!email || !password) return
-    localStorage.setItem("auth", "true")
-    localStorage.setItem("currentUser", email)
-    navigate("/")
-  }
-
-  return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">
-      <div className="w-full max-w-sm bg-white/5 p-8 rounded-2xl border border-white/10">
-        <h1 className="text-3xl font-bold mb-6 text-center">Sign Up</h1>
-
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full mb-4 p-3 rounded bg-black/40 border border-white/10"
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full mb-6 p-3 rounded bg-black/40 border border-white/10"
-          onChange={(e) => setPassword(e.target.value)}
-        />
-
-        <button
-          onClick={handleSignup}
-          className="w-full py-3 bg-indigo-600 rounded-xl font-semibold"
-        >
-          Create Account
-        </button>
-      </div>
-    </div>
-  )
-}
-
-/* ---------------- HOME ---------------- */
+/* ---------- HOME ---------- */
 function Home() {
   const navigate = useNavigate()
-  const [fileName, setFileName] = useState<string | null>(null)
+  const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
-
-  const user = getUser()
+  const user = localStorage.getItem("user")
 
   const logout = () => {
-    localStorage.removeItem("auth")
-    localStorage.removeItem("currentUser")
-    navigate("/")
+    localStorage.clear()
+    navigate("/login")
   }
 
   const generate = () => {
-    if (!isLoggedIn()) {
-      navigate("/login")
-      return
-    }
-
-    if (!fileName) return
+    if (!file) return
     setLoading(true)
     setTimeout(() => navigate("/preview"), 2000)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-black to-zinc-900 text-white">
-      <header className="flex justify-between items-center px-10 py-6">
-        <h1 className="text-2xl font-bold">
-          Guide<span className="text-indigo-400">Craft</span>
-        </h1>
-
-        <div className="flex items-center gap-4">
-          {user ? (
-            <>
-              <span className="text-sm text-white/70">{user}</span>
-              <button
-                onClick={logout}
-                className="px-4 py-2 bg-red-500/80 rounded-lg"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={() => navigate("/login")}
-              className="px-4 py-2 bg-indigo-600 rounded-lg"
-            >
-              Login
-            </button>
-          )}
+    <div className="min-h-screen bg-black text-white">
+      <header className="flex justify-between px-8 py-6">
+        <div>
+          <h1 className="text-xl font-bold">GuideCraft</h1>
+          <p className="text-sm text-gray-400">Logged in as {user}</p>
         </div>
+
+        <button onClick={logout} className="bg-red-500 px-4 py-2 rounded">
+          Logout
+        </button>
       </header>
 
-      <main className="flex flex-col items-center mt-32 text-center">
-        <h2 className="text-5xl font-extrabold">
+      <main className="flex flex-col items-center mt-32">
+        <h2 className="text-4xl font-bold mb-10 text-center">
           Turn recordings into <br />
           <span className="text-indigo-400">step-by-step guides</span>
         </h2>
 
-        <div className="mt-12 bg-white/10 p-8 rounded-2xl w-[360px]">
+        <div className="bg-white/10 p-8 rounded-xl">
           {!loading ? (
             <>
-              <label className="block border-2 border-dashed p-8 rounded-xl cursor-pointer text-center">
-                {fileName || "Upload file"}
-                <input
-                  type="file"
-                  hidden
-                  onChange={(e) =>
-                    setFileName(e.target.files?.[0]?.name || null)
-                  }
-                />
-              </label>
+              <input
+                type="file"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+              />
 
               <button
                 onClick={generate}
-                className="mt-6 w-full py-3 bg-indigo-600 rounded-xl"
+                disabled={!file}
+                className="block w-full mt-6 bg-indigo-600 py-3 rounded disabled:opacity-50"
               >
                 Generate Guide
               </button>
             </>
           ) : (
-            <div className="py-10">
-              <div className="h-12 w-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <div className="text-center">
+              <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
               <p className="mt-4">Processing…</p>
             </div>
           )}
@@ -200,48 +141,34 @@ function Home() {
   )
 }
 
-/* ---------------- PREVIEW ---------------- */
+/* ---------- PREVIEW ---------- */
 function Preview() {
   const navigate = useNavigate()
 
-  if (!isLoggedIn()) {
-    navigate("/login")
-    return null
-  }
-
   return (
-    <div className="min-h-screen bg-zinc-950 text-white px-10 py-8">
-      <button
-        onClick={() => navigate("/")}
-        className="mb-6 text-indigo-400"
-      >
+    <div className="min-h-screen bg-black text-white p-8">
+      <button onClick={() => navigate("/")} className="text-indigo-400 mb-6">
         ← Back
       </button>
 
-      <h1 className="text-4xl font-bold mb-8">Generated Guide</h1>
+      <h1 className="text-3xl font-bold mb-6">Generated Guide</h1>
 
-      {["Open app", "Click settings", "Save changes"].map((s, i) => (
-        <div key={i} className="mb-6 p-6 bg-white/5 rounded-xl">
-          <h2 className="text-xl font-semibold">
-            Step {i + 1}: {s}
-          </h2>
-          <div className="mt-3 h-40 bg-black/40 rounded-lg flex items-center justify-center">
-            Screenshot
-          </div>
+      {["Open app", "Click settings", "Save changes"].map((step, i) => (
+        <div key={i} className="bg-white/10 p-6 mb-4 rounded">
+          Step {i + 1}: {step}
         </div>
       ))}
     </div>
   )
 }
 
-/* ---------------- ROUTES ---------------- */
+/* ---------- ROUTES ---------- */
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/preview" element={<Preview />} />
+      <Route path="/" element={<Protected><Home /></Protected>} />
+      <Route path="/preview" element={<Protected><Preview /></Protected>} />
     </Routes>
   )
 }
