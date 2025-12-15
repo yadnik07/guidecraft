@@ -1,151 +1,203 @@
 import { useState } from "react"
+import {
+  Routes,
+  Route,
+  useNavigate,
+  Navigate,
+} from "react-router-dom"
 
-function App() {
-  const [fileName, setFileName] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [showPreview, setShowPreview] = useState(false)
+/* ---------------- AUTH STATE (MOCK) ---------------- */
+function useAuth() {
+  const isLoggedIn = localStorage.getItem("auth") === "true"
+  return { isLoggedIn }
+}
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFileName(e.target.files[0].name)
-    }
+/* ---------------- PROTECTED ROUTE ---------------- */
+function Protected({ children }: { children: JSX.Element }) {
+  const { isLoggedIn } = useAuth()
+  return isLoggedIn ? children : <Navigate to="/login" replace />
+}
+
+/* ---------------- LOGIN PAGE ---------------- */
+function Login() {
+  const navigate = useNavigate()
+  const { isLoggedIn } = useAuth()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+
+  if (isLoggedIn) {
+    return <Navigate to="/" replace />
   }
 
-  const handleGenerate = () => {
+  const handleLogin = () => {
+    if (!email || !password) return
+    localStorage.setItem("auth", "true")
+    navigate("/", { replace: true })
+  }
+
+  return (
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">
+      <div className="w-full max-w-sm bg-white/5 p-8 rounded-2xl border border-white/10">
+        <h1 className="text-3xl font-bold mb-6 text-center">
+          Sign In
+        </h1>
+
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full mb-4 p-3 rounded bg-black/40 border border-white/10"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full mb-6 p-3 rounded bg-black/40 border border-white/10"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button
+          onClick={handleLogin}
+          className="w-full py-3 bg-indigo-600 rounded-xl font-semibold"
+        >
+          Login
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/* ---------------- HOME ---------------- */
+function Home() {
+  const [fileName, setFileName] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
+
+  const logout = () => {
+    localStorage.removeItem("auth")
+    navigate("/login", { replace: true })
+  }
+
+  const generate = () => {
     if (!fileName) return
     setLoading(true)
 
     setTimeout(() => {
-      setLoading(false)
-      setShowPreview(true)
-    }, 3000)
+      navigate("/preview")
+    }, 2000)
   }
 
-  // -------- PREVIEW PAGE --------
-  if (showPreview) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-black to-zinc-900 text-white px-10 py-8">
-        {/* Header */}
-        <header className="flex items-center justify-between mb-10">
-          <h1 className="text-2xl font-bold">
-            Guide<span className="text-indigo-400">Craft</span>
-          </h1>
-          <button
-            onClick={() => {
-              setShowPreview(false)
-              setFileName(null)
-            }}
-            className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition"
-          >
-            ← Back
-          </button>
-        </header>
-
-        {/* Preview Content */}
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-extrabold mb-2">
-            Generated Guide
-          </h2>
-          <p className="text-gray-400 mb-8">
-            From recording: <span className="text-indigo-400">{fileName}</span>
-          </p>
-
-          {/* Steps */}
-          <div className="space-y-6">
-            {[
-              "Open the application dashboard",
-              "Navigate to the settings panel",
-              "Enable the required feature",
-              "Save changes and verify output",
-            ].map((step, index) => (
-              <div
-                key={index}
-                className="rounded-xl bg-white/10 border border-white/10 p-6"
-              >
-                <h3 className="text-xl font-semibold mb-2">
-                  Step {index + 1}
-                </h3>
-                <p className="text-gray-300">{step}</p>
-                <div className="mt-4 h-40 rounded-lg bg-black/40 flex items-center justify-center text-gray-500">
-                  Screenshot preview
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // -------- HOME PAGE --------
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-black to-zinc-900 text-white">
-      {/* Navbar */}
-      <header className="flex items-center justify-between px-10 py-6">
+      <header className="flex justify-between px-10 py-6">
         <h1 className="text-2xl font-bold">
           Guide<span className="text-indigo-400">Craft</span>
         </h1>
-        <button className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 transition">
-          Sign In
+        <button
+          onClick={logout}
+          className="px-4 py-2 bg-red-500/80 rounded-lg"
+        >
+          Logout
         </button>
       </header>
 
-      {/* Hero */}
-      <main className="flex flex-col items-center justify-center text-center mt-32 px-4">
-        <h2 className="text-5xl font-extrabold leading-tight text-white/90">
+      <main className="flex flex-col items-center mt-32 text-center">
+        <h2 className="text-5xl font-extrabold">
           Turn recordings into <br />
           <span className="text-indigo-400">step-by-step guides</span>
         </h2>
 
-        <p className="mt-6 max-w-xl text-gray-400 text-lg">
-          Create beautiful product guides automatically from your screen
-          recordings.
-        </p>
-
-        {/* Upload Card */}
-        <div className="mt-12 w-full max-w-md rounded-2xl bg-white/10 backdrop-blur-lg border border-white/10 p-8">
-          <p className="mb-4 text-gray-300">Upload a screen recording</p>
-
-          {!loading && (
+        <div className="mt-12 bg-white/10 p-8 rounded-2xl">
+          {!loading ? (
             <>
-              <label
-                htmlFor="upload"
-                className="block border-2 border-dashed border-white/20 rounded-xl p-8
-                text-gray-400 hover:border-indigo-400 hover:bg-white/5 transition cursor-pointer"
-              >
-                {fileName ? fileName : "Click or drag file here"}
+              <label className="block border-2 border-dashed p-8 rounded-xl cursor-pointer">
+                {fileName || "Upload file"}
+                <input
+                  type="file"
+                  hidden
+                  onChange={(e) =>
+                    setFileName(e.target.files?.[0]?.name || null)
+                  }
+                />
               </label>
 
-              <input
-                id="upload"
-                type="file"
-                className="hidden"
-                onChange={handleFileChange}
-              />
+              <button
+                onClick={generate}
+                disabled={!fileName}
+                className="mt-6 w-full py-3 bg-indigo-600 rounded-xl disabled:opacity-50"
+              >
+                Generate Guide
+              </button>
             </>
-          )}
-
-          {loading && (
-            <div className="flex flex-col items-center justify-center py-10">
-              <div className="h-12 w-12 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
-              <p className="mt-4 text-gray-300">
-                Processing recording…
-              </p>
+          ) : (
+            <div className="py-10">
+              <div className="h-12 w-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <p className="mt-4">Processing…</p>
             </div>
           )}
-
-          <button
-            onClick={handleGenerate}
-            disabled={loading || !fileName}
-            className="mt-6 w-full py-3 rounded-xl bg-indigo-600
-            hover:bg-indigo-500 transition font-semibold disabled:opacity-50"
-          >
-            {loading ? "Generating…" : "Generate Guide"}
-          </button>
         </div>
       </main>
     </div>
   )
 }
 
-export default App
+/* ---------------- PREVIEW ---------------- */
+function Preview() {
+  const navigate = useNavigate()
+
+  return (
+    <div className="min-h-screen bg-zinc-950 text-white px-10 py-8">
+      <button
+        onClick={() => navigate("/")}
+        className="mb-6 text-indigo-400"
+      >
+        ← Back
+      </button>
+
+      <h1 className="text-4xl font-bold mb-8">
+        Generated Guide
+      </h1>
+
+      {["Open app", "Click settings", "Save changes"].map((s, i) => (
+        <div
+          key={i}
+          className="mb-6 p-6 bg-white/5 rounded-xl"
+        >
+          <h2 className="text-xl font-semibold">
+            Step {i + 1}: {s}
+          </h2>
+          <div className="mt-3 h-40 bg-black/40 rounded-lg flex items-center justify-center">
+            Screenshot
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/* ---------------- ROUTES ---------------- */
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route
+        path="/"
+        element={
+          <Protected>
+            <Home />
+          </Protected>
+        }
+      />
+      <Route
+        path="/preview"
+        element={
+          <Protected>
+            <Preview />
+          </Protected>
+        }
+      />
+    </Routes>
+  )
+}
