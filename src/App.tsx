@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
   Routes,
   Route,
@@ -7,8 +7,15 @@ import {
 } from "react-router-dom"
 
 /* ---------------- AUTH STATE (MOCK) ---------------- */
-function isLoggedIn() {
-  return localStorage.getItem("auth") === "true"
+function useAuth() {
+  const isLoggedIn = localStorage.getItem("auth") === "true"
+  return { isLoggedIn }
+}
+
+/* ---------------- PROTECTED ROUTE ---------------- */
+function Protected({ children }: { children: JSX.Element }) {
+  const { isLoggedIn } = useAuth()
+  return isLoggedIn ? children : <Navigate to="/login" />
 }
 
 /* ---------------- LOGIN PAGE ---------------- */
@@ -20,23 +27,20 @@ function Login() {
   const handleLogin = () => {
     if (!email || !password) return
     localStorage.setItem("auth", "true")
-
-    // after login, go back to home (generate again)
-    navigate("/", { replace: true })
+    navigate("/")
   }
 
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">
       <div className="w-full max-w-sm bg-white/5 p-8 rounded-2xl border border-white/10">
         <h1 className="text-3xl font-bold mb-6 text-center">
-          Please Login First
+          Sign In
         </h1>
 
         <input
           type="email"
           placeholder="Email"
           className="w-full mb-4 p-3 rounded bg-black/40 border border-white/10"
-          value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 
@@ -44,7 +48,6 @@ function Login() {
           type="password"
           placeholder="Password"
           className="w-full mb-6 p-3 rounded bg-black/40 border border-white/10"
-          value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
@@ -59,28 +62,29 @@ function Login() {
   )
 }
 
-/* ---------------- HOME (PUBLIC) ---------------- */
+/* ---------------- HOME ---------------- */
 function Home() {
+  const [fileName, setFileName] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { isLoggedIn } = useAuth()
+
+  const logout = () => {
+    localStorage.removeItem("auth")
+    navigate("/login")
+  }
 
   const generate = () => {
-    // 🔑 check login first
-    if (!isLoggedIn()) {
+    if (!isLoggedIn) {
+      alert("Please login to generate a guide")
       navigate("/login")
       return
     }
 
-    // fake processing
-    setLoading(true)
-    setTimeout(() => {
-      navigate("/preview")
-    }, 2000)
-  }
+    if (!fileName) return
 
-  const logout = () => {
-    localStorage.removeItem("auth")
-    navigate("/")
+    setLoading(true)
+    setTimeout(() => navigate("/preview"), 2000)
   }
 
   return (
@@ -90,7 +94,7 @@ function Home() {
           Guide<span className="text-indigo-400">Craft</span>
         </h1>
 
-        {isLoggedIn() && (
+        {isLoggedIn && (
           <button
             onClick={logout}
             className="px-4 py-2 bg-red-500/80 rounded-lg"
@@ -106,16 +110,23 @@ function Home() {
           <span className="text-indigo-400">step-by-step guides</span>
         </h2>
 
-        <div className="mt-12 bg-white/10 p-8 rounded-2xl w-[380px]">
+        <div className="mt-12 bg-white/10 p-8 rounded-2xl w-[360px]">
           {!loading ? (
             <>
-              <div className="border-2 border-dashed p-8 rounded-xl text-gray-400 mb-6">
-                Upload recording (mock)
-              </div>
+              <label className="block border-2 border-dashed p-8 rounded-xl cursor-pointer">
+                {fileName || "Upload file"}
+                <input
+                  type="file"
+                  hidden
+                  onChange={(e) =>
+                    setFileName(e.target.files?.[0]?.name || null)
+                  }
+                />
+              </label>
 
               <button
                 onClick={generate}
-                className="w-full py-3 bg-indigo-600 rounded-xl font-semibold hover:bg-indigo-500"
+                className="mt-6 w-full py-3 bg-indigo-600 rounded-xl"
               >
                 Generate Guide
               </button>
@@ -132,15 +143,9 @@ function Home() {
   )
 }
 
-/* ---------------- PREVIEW (PROTECTED) ---------------- */
+/* ---------------- PREVIEW ---------------- */
 function Preview() {
   const navigate = useNavigate()
-
-  useEffect(() => {
-    if (!isLoggedIn()) {
-      navigate("/login", { replace: true })
-    }
-  }, [navigate])
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white px-10 py-8">
@@ -176,9 +181,23 @@ function Preview() {
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/preview" element={<Preview />} />
+      <Route
+        path="/"
+        element={
+          <Protected>
+            <Home />
+          </Protected>
+        }
+      />
+      <Route
+        path="/preview"
+        element={
+          <Protected>
+            <Preview />
+          </Protected>
+        }
+      />
     </Routes>
   )
 }
