@@ -71,7 +71,6 @@ function Login() {
 
 /* ---------------- HOME ---------------- */
 function Home() {
-  const [fileName, setFileName] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
@@ -81,9 +80,7 @@ function Home() {
   }
 
   const generate = () => {
-    if (!fileName) return
     setLoading(true)
-
     setTimeout(() => {
       navigate("/preview")
     }, 2000)
@@ -109,24 +106,16 @@ function Home() {
           <span className="text-indigo-400">step-by-step guides</span>
         </h2>
 
-        <div className="mt-12 bg-white/10 p-8 rounded-2xl">
+        <div className="mt-12 bg-white/10 p-8 rounded-2xl w-[380px]">
           {!loading ? (
             <>
-              <label className="block border-2 border-dashed p-8 rounded-xl cursor-pointer">
-                {fileName || "Upload file"}
-                <input
-                  type="file"
-                  hidden
-                  onChange={(e) =>
-                    setFileName(e.target.files?.[0]?.name || null)
-                  }
-                />
-              </label>
+              <div className="border-2 border-dashed p-8 rounded-xl text-gray-400 mb-6">
+                Upload recording (mock)
+              </div>
 
               <button
                 onClick={generate}
-                disabled={!fileName}
-                className="mt-6 w-full py-3 bg-indigo-600 rounded-xl disabled:opacity-50"
+                className="w-full py-3 bg-indigo-600 rounded-xl font-semibold hover:bg-indigo-500"
               >
                 Generate Guide
               </button>
@@ -142,6 +131,7 @@ function Home() {
     </div>
   )
 }
+
 
 /* ---------------- PREVIEW ---------------- */
 function Preview() {
