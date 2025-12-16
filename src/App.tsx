@@ -101,10 +101,14 @@ function Home() {
   const navigate = useNavigate()
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
-  const user = getUser()
+
+  // ✅ FIX: user now in state
+  const [user, setUser] = useState<string | null>(getUser())
 
   const logout = () => {
-    localStorage.clear()
+    localStorage.removeItem("auth")
+    localStorage.removeItem("currentUser")
+    setUser(null)            // 🔥 important
     navigate("/")
   }
 
