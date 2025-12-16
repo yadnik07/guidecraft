@@ -193,6 +193,7 @@ function Home() {
 }
 
 /* ================= PREVIEW ================= */
+/* ---------------- PREVIEW ---------------- */
 function Preview() {
   const navigate = useNavigate()
 
@@ -203,17 +204,58 @@ function Preview() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white px-10 py-8">
-      <button onClick={() => navigate("/")} className="mb-6 text-indigo-400">
+      {/* Back */}
+      <button
+        onClick={() => navigate("/")}
+        className="mb-6 text-indigo-400 hover:underline"
+      >
         ← Back
       </button>
 
-      <h1 className="text-4xl font-bold mb-8">Generated Guide</h1>
+      <h1 className="text-4xl font-bold mb-10">
+        Generated Guide
+      </h1>
 
-      {["Open app", "Click settings", "Save changes"].map((s, i) => (
-        <div key={i} className="mb-6 p-6 bg-white/5 rounded-xl">
-          Step {i + 1}: {s}
+      {/* Video Preview */}
+      <div className="mb-12 bg-white/5 rounded-2xl p-6 border border-white/10">
+        <h2 className="text-xl font-semibold mb-4">
+          Screen Recording Preview
+        </h2>
+
+        <div className="h-64 bg-black/60 rounded-xl flex items-center justify-center text-white/50">
+          Video Preview (mock)
         </div>
-      ))}
+
+        <p className="mt-4 text-sm text-white/60">
+          This is a placeholder for the uploaded screen recording.
+        </p>
+      </div>
+
+      {/* Steps */}
+      <div className="space-y-6">
+        {[
+          "Open the application",
+          "Navigate to settings",
+          "Update preferences and save",
+        ].map((step, i) => (
+          <div
+            key={i}
+            className="bg-white/5 p-6 rounded-2xl border border-white/10 hover:border-indigo-500/40 transition"
+          >
+            <h3 className="text-lg font-semibold mb-2">
+              Step {i + 1}
+            </h3>
+
+            <p className="text-white/80 mb-4">
+              {step}
+            </p>
+
+            <div className="h-40 bg-black/40 rounded-lg flex items-center justify-center text-white/40">
+              Screenshot / Frame
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
