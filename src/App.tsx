@@ -1,11 +1,11 @@
 import { useState } from "react"
 import { Routes, Route, useNavigate } from "react-router-dom"
 
-/* ---------- AUTH HELPERS ---------- */
+
 const isLoggedIn = () => localStorage.getItem("auth") === "true"
 const getUser = () => localStorage.getItem("currentUser")
 
-/* ---------- LOGIN ---------- */
+
 function Login() {
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
@@ -54,7 +54,7 @@ function Login() {
   )
 }
 
-/* ---------- SIGNUP ---------- */
+
 function Signup() {
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
@@ -96,19 +96,19 @@ function Signup() {
   )
 }
 
-/* ---------- HOME ---------- */
+
 function Home() {
   const navigate = useNavigate()
   const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
 
-  // ✅ FIX: user now in state
+  
   const [user, setUser] = useState<string | null>(getUser())
 
   const logout = () => {
     localStorage.removeItem("auth")
     localStorage.removeItem("currentUser")
-    setUser(null)            // 🔥 important
+    setUser(null)           
     navigate("/")
   }
 
@@ -191,7 +191,7 @@ function Home() {
   )
 }
 
-/* ---------- PREVIEW ---------- */
+
 function Preview() {
   const navigate = useNavigate()
   const video = localStorage.getItem("videoUrl")
@@ -235,7 +235,7 @@ function Preview() {
   )
 }
 
-/* ---------- ROUTES ---------- */
+
 export default function App() {
   return (
     <Routes>

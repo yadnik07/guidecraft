@@ -1,104 +1,114 @@
 GuideCraft – Frontend Demo inspired by Clueso.io
 
 GuideCraft is a frontend-only web application inspired by Clueso.io.
-It demonstrates how screen recordings can be converted into simple,
-step-by-step guides using a clean UI and simulated flows.
+It demonstrates how screen recordings can be converted into clear,
+step-by-step guides using a clean user interface and simulated product flow.
 
-The main focus of this project is product understanding, UI flow,
-routing, and frontend architecture. Backend services and AI-based
-processing are intentionally mocked for demonstration purposes.
-
-
+This project focuses on frontend architecture, routing, authentication flow,
+and user experience. All backend, AI processing, and video analysis features
+are intentionally mocked for demonstration purposes.
 
 Tech Stack
 
-- React (Vite)
-- TypeScript
-- Tailwind CSS
-- React Router DOM
-- Deployed on Vercel
-
-
+React (Vite)
+TypeScript
+Tailwind CSS
+React Router DOM
+LocalStorage for mock authentication
+Deployment: Vercel
 
 Features Implemented
 
-- Landing page inspired by Clueso.io
-- Mock authentication using browser localStorage
-- Protected routes (login required for guide generation)
-- Upload UI for screen recording (frontend simulation)
-- Loader animation after clicking "Generate Guide"
-- Preview page showing generated step-by-step guide
-- Logout functionality
-- Responsive dark-themed UI
+Landing page similar to Clueso.io style
+Login and Signup using mock authentication
+Logout functionality
+Authentication handled using browser localStorage
+Conditional UI based on login state
+Upload screen recording (video file) – simulated flow
+Loader animation during guide generation
+Preview page showing uploaded video
+Step-by-step guide generated from mock data
+Video preview shown for each step
+Clean dark UI and responsive layout
 
-
+Note:
+Actual AI guide generation and video processing are not implemented.
+This project simulates the full frontend flow only.
 
 Project Structure
 
 src/
- ├─ App.tsx        Main routes, authentication logic, app flow
- ├─ main.tsx       Application entry point
- ├─ index.css      Tailwind CSS styles
- ├─ assets/        Static assets
+ ├─ App.tsx     Main routes, authentication logic, app flow
+ ├─ main.tsx    Application entry point
+ ├─ index.css   Tailwind CSS styles
+ ├─ assets/     Static assets
 
+
+How Authentication Works
+
+Authentication is mocked using browser localStorage.
+
+On login or signup:
+auth is set to true
+currentUser is saved
+
+On logout:
+localStorage is cleared
+user is redirected to the home page
+
+Protected behavior:
+Generate Guide redirects to login if user is not authenticated
+Preview page is accessible only after login
 
 
 Running the Project Locally
 
-1. Clone the repository
+Step 1: Clone the repository
 
 git clone https://github.com/yadnik07/guidecraft.git
 cd guidecraft
 
-2. Install dependencies
+Step 2: Install dependencies
 
 npm install
 
-3. Start development server
+Step 3: Start development server
 
 npm run dev
 
-The application will run on the local Vite port shown in the terminal.
-
+The app will run on the Vite local development URL shown in the terminal.
 
 
 Deployment
 
-The project is deployed using Vercel.
+The project is deployed on Vercel.
 
 Live URL:
 https://guidecraft.vercel.app
 
 
-
-Authentication Notes
-
-Authentication is implemented using browser localStorage.
-No real backend, database, or password storage is connected.
-
-This decision was intentional to keep the project frontend-focused.
-
-
-
 Assumptions and Design Decisions
 
-- Backend and AI features are out of scope
-- File upload is simulated for UI demonstration
-- Guide generation is mocked using static steps
-- Primary focus is on UI flow, routing, and clean structure
-- Designed to replicate the Clueso.io experience at a basic level
-
+Backend services are out of scope
+AI processing is simulated
+File upload is frontend-only
+Guide steps are static mock data
+Focus is on UI flow, routing, and user experience
+Designed to resemble Clueso.io at a basic product level
 
 
 Video Demo
 
-A demo video is provided separately showing:
-- Login and signup flow
-- Upload interaction
-- Loader animation
-- Preview page
-- Overall navigation
+A screen recording demo is provided separately showing:
 
+Landing page
+Login flow
+Signup flow
+Upload screen recording
+Generate guide interaction
+Loader animation
+Preview page with video and steps
+Logout functionality
 
 
 Author
