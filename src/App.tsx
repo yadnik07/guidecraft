@@ -1,17 +1,17 @@
 import { useState } from "react"
 import { Routes, Route, useNavigate } from "react-router-dom"
 
-/* ================= AUTH HELPERS ================= */
+/* ---------- AUTH HELPERS ---------- */
 const isLoggedIn = () => localStorage.getItem("auth") === "true"
 const getUser = () => localStorage.getItem("currentUser")
 
-/* ================= LOGIN ================= */
+/* ---------- LOGIN ---------- */
 function Login() {
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
-  const handleLogin = () => {
+  const login = () => {
     if (!email || !password) return
     localStorage.setItem("auth", "true")
     localStorage.setItem("currentUser", email)
@@ -19,49 +19,48 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">
-      <div className="w-full max-w-sm bg-white/5 p-8 rounded-2xl border border-white/10">
-        <h1 className="text-3xl font-bold mb-6 text-center">Login</h1>
+    <div className="min-h-screen bg-black flex items-center justify-center text-white">
+      <div className="bg-white/10 p-8 rounded-xl w-80">
+        <h1 className="text-2xl font-bold mb-4">Login</h1>
 
         <input
-          type="email"
+          className="w-full p-3 mb-3 bg-black/40 rounded"
           placeholder="Email"
-          className="w-full mb-4 p-3 rounded bg-black/40 border border-white/10"
           onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
           type="password"
+          className="w-full p-3 mb-4 bg-black/40 rounded"
           placeholder="Password"
-          className="w-full mb-6 p-3 rounded bg-black/40 border border-white/10"
           onChange={(e) => setPassword(e.target.value)}
         />
 
         <button
-          onClick={handleLogin}
-          className="w-full py-3 bg-indigo-600 rounded-xl font-semibold"
+          onClick={login}
+          className="w-full bg-indigo-600 py-2 rounded"
         >
           Login
         </button>
 
         <p
+          className="text-sm text-indigo-400 text-center mt-4 cursor-pointer"
           onClick={() => navigate("/signup")}
-          className="mt-4 text-sm text-center text-indigo-400 cursor-pointer"
         >
-          New user? Create account
+          New user? Sign up
         </p>
       </div>
     </div>
   )
 }
 
-/* ================= SIGNUP ================= */
+/* ---------- SIGNUP ---------- */
 function Signup() {
   const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
-  const handleSignup = () => {
+  const signup = () => {
     if (!email || !password) return
     localStorage.setItem("auth", "true")
     localStorage.setItem("currentUser", email)
@@ -69,27 +68,26 @@ function Signup() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-white">
-      <div className="w-full max-w-sm bg-white/5 p-8 rounded-2xl border border-white/10">
-        <h1 className="text-3xl font-bold mb-6 text-center">Sign Up</h1>
+    <div className="min-h-screen bg-black flex items-center justify-center text-white">
+      <div className="bg-white/10 p-8 rounded-xl w-80">
+        <h1 className="text-2xl font-bold mb-4">Signup</h1>
 
         <input
-          type="email"
+          className="w-full p-3 mb-3 bg-black/40 rounded"
           placeholder="Email"
-          className="w-full mb-4 p-3 rounded bg-black/40 border border-white/10"
           onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
           type="password"
+          className="w-full p-3 mb-4 bg-black/40 rounded"
           placeholder="Password"
-          className="w-full mb-6 p-3 rounded bg-black/40 border border-white/10"
           onChange={(e) => setPassword(e.target.value)}
         />
 
         <button
-          onClick={handleSignup}
-          className="w-full py-3 bg-indigo-600 rounded-xl font-semibold"
+          onClick={signup}
+          className="w-full bg-indigo-600 py-2 rounded"
         >
           Create Account
         </button>
@@ -98,12 +96,11 @@ function Signup() {
   )
 }
 
-/* ================= HOME (MAIN UI SAME AS ORIGINAL) ================= */
+/* ---------- HOME ---------- */
 function Home() {
   const navigate = useNavigate()
-  const [fileName, setFileName] = useState<string | null>(null)
+  const [file, setFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
-
   const user = getUser()
 
   const logout = () => {
@@ -117,26 +114,26 @@ function Home() {
       return
     }
 
-    if (!fileName) return
+    if (!file) return
+
+    localStorage.setItem("videoUrl", URL.createObjectURL(file))
     setLoading(true)
+
     setTimeout(() => navigate("/preview"), 2000)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-black to-zinc-900 text-white">
-      {/* HEADER */}
-      <header className="flex justify-between items-center px-10 py-6">
-        <h1 className="text-2xl font-bold">
-          Guide<span className="text-indigo-400">Craft</span>
-        </h1>
+    <div className="min-h-screen bg-black text-white">
+      <header className="flex justify-between px-10 py-6">
+        <h1 className="text-xl font-bold">GuideCraft</h1>
 
-        <div className="flex items-center gap-4">
+        <div className="flex gap-4 items-center">
           {user ? (
             <>
-              <span className="text-sm text-white/70">{user}</span>
+              <span className="text-sm text-white/60">{user}</span>
               <button
                 onClick={logout}
-                className="px-4 py-2 bg-red-500/80 rounded-lg"
+                className="bg-red-500 px-4 py-2 rounded"
               >
                 Logout
               </button>
@@ -144,45 +141,43 @@ function Home() {
           ) : (
             <button
               onClick={() => navigate("/login")}
-              className="px-4 py-2 bg-indigo-600 rounded-lg"
+              className="bg-indigo-600 px-4 py-2 rounded"
             >
-              Login / Signup
+              Login
             </button>
           )}
         </div>
       </header>
 
-      {/* CENTER CONTENT */}
       <main className="flex flex-col items-center mt-32 text-center">
-        <h2 className="text-5xl font-extrabold">
+        <h2 className="text-5xl font-bold">
           Turn recordings into <br />
           <span className="text-indigo-400">step-by-step guides</span>
         </h2>
 
-        <div className="mt-12 bg-white/10 p-8 rounded-2xl w-[360px]">
+        <div className="mt-12 bg-white/10 p-8 rounded-xl w-96">
           {!loading ? (
             <>
-              <label className="block border-2 border-dashed p-8 rounded-xl cursor-pointer text-center">
-                {fileName || "Upload a screen recording"}
+              <label className="block border-2 border-dashed p-8 rounded cursor-pointer">
+                {file ? file.name : "Upload screen recording"}
                 <input
                   type="file"
+                  accept="video/*"
                   hidden
-                  onChange={(e) =>
-                    setFileName(e.target.files?.[0]?.name || null)
-                  }
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
                 />
               </label>
 
               <button
                 onClick={generate}
-                className="mt-6 w-full py-3 bg-indigo-600 rounded-xl"
+                className="mt-6 w-full bg-indigo-600 py-3 rounded"
               >
                 Generate Guide
               </button>
             </>
           ) : (
             <div className="py-10">
-              <div className="h-12 w-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <div className="h-10 w-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto" />
               <p className="mt-4">Processing…</p>
             </div>
           )}
@@ -192,10 +187,10 @@ function Home() {
   )
 }
 
-/* ================= PREVIEW ================= */
-/* ---------------- PREVIEW ---------------- */
+/* ---------- PREVIEW ---------- */
 function Preview() {
   const navigate = useNavigate()
+  const video = localStorage.getItem("videoUrl")
 
   if (!isLoggedIn()) {
     navigate("/login")
@@ -203,64 +198,40 @@ function Preview() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white px-10 py-8">
-      {/* Back */}
+    <div className="min-h-screen bg-black text-white p-10">
       <button
         onClick={() => navigate("/")}
-        className="mb-6 text-indigo-400 hover:underline"
+        className="text-indigo-400 mb-6"
       >
         ← Back
       </button>
 
-      <h1 className="text-4xl font-bold mb-10">
-        Generated Guide
-      </h1>
+      <h1 className="text-4xl font-bold mb-8">Generated Guide</h1>
 
-      {/* Video Preview */}
-      <div className="mb-12 bg-white/5 rounded-2xl p-6 border border-white/10">
-        <h2 className="text-xl font-semibold mb-4">
-          Screen Recording Preview
-        </h2>
+      <video
+        src={video || ""}
+        controls
+        className="w-full h-72 rounded-xl mb-10 bg-black"
+      />
 
-        <div className="h-64 bg-black/60 rounded-xl flex items-center justify-center text-white/50">
-          Video Preview (mock)
+      {["Open app", "Click settings", "Save changes"].map((s, i) => (
+        <div key={i} className="mb-8 bg-white/10 p-6 rounded-xl">
+          <h2 className="text-lg font-semibold mb-3">
+            Step {i + 1}: {s}
+          </h2>
+
+          <video
+            src={video || ""}
+            muted
+            className="h-40 w-full rounded bg-black"
+          />
         </div>
-
-        <p className="mt-4 text-sm text-white/60">
-          This is a placeholder for the uploaded screen recording.
-        </p>
-      </div>
-
-      {/* Steps */}
-      <div className="space-y-6">
-        {[
-          "Open the application",
-          "Navigate to settings",
-          "Update preferences and save",
-        ].map((step, i) => (
-          <div
-            key={i}
-            className="bg-white/5 p-6 rounded-2xl border border-white/10 hover:border-indigo-500/40 transition"
-          >
-            <h3 className="text-lg font-semibold mb-2">
-              Step {i + 1}
-            </h3>
-
-            <p className="text-white/80 mb-4">
-              {step}
-            </p>
-
-            <div className="h-40 bg-black/40 rounded-lg flex items-center justify-center text-white/40">
-              Screenshot / Frame
-            </div>
-          </div>
-        ))}
-      </div>
+      ))}
     </div>
   )
 }
 
-/* ================= ROUTES ================= */
+/* ---------- ROUTES ---------- */
 export default function App() {
   return (
     <Routes>
